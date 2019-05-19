@@ -1,0 +1,41 @@
+ #!/bin/bash
+ function _max_tr_ {
+     i_tr=`cat ${str_ls} | tr -t " " "\n" | wc -l`
+     lenmax=0
+     for((j_tr=1;j_tr<=i_tr;j_tr++));do
+        str=`cat ${str_ls} | tr -c "a-zA-Z" " " | tr -t " " "\n" | grep -v "^$" | head -n ${j_tr:-1} | tail -n 1` 
+        len=${#str}
+        if [[ ${len} -gt ${lenmax} ]]; then
+            lenmax=${len}
+            str_max=${str}
+        fi
+     done
+     echo ${lenmax}
+     echo ${str_max}
+    return
+ }
+
+ function _find_ls_ {
+     pwd
+     local i_ls=`ls | tr -t " " "\n" | wc -l`
+     local j_ls=1
+     for((j_ls=1;j_ls<=i_ls;j_ls++));do
+     str_ls=`ls -A | tr -t " " "\n" | head -n ${j_ls:-0} | tail -n 1`
+     echo ${str_ls}
+     if [[ -d ${str_ls} ]]; then
+        i_dir=${str_ls}/
+        cd ${i_dir}
+        _find_ls_
+        cd ..
+     else
+       _max_tr_
+     fi
+     done
+     return
+ }
+for i in $@;do
+    cd $i
+    _find_ls_
+    cd /home/liujunming/shell/
+done
+
