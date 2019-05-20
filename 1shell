@@ -1,41 +1,70 @@
- #!/bin/bash
- function _max_tr_ {
-     i_tr=`cat ${str_ls} | tr -t " " "\n" | wc -l`
-     lenmax=0
-     for((j_tr=1;j_tr<=i_tr;j_tr++));do
+#!/bin/bash
+
+MAX=0
+MAXString=0
+
+function _max_tr_ {
+    i_tr=`cat ${str_ls} | tr -t " " "\n" | wc -l`
+    for((j_tr=1;j_tr<=i_tr;j_tr++));do
         str=`cat ${str_ls} | tr -c "a-zA-Z" " " | tr -t " " "\n" | grep -v "^$" | head -n ${j_tr:-1} | tail -n 1` 
         len=${#str}
-        if [[ ${len} -gt ${lenmax} ]]; then
-            lenmax=${len}
-            str_max=${str}
+        if [[ ${len} -gt ${MAX} ]]; then
+            MAX=${len}
+            MAXString=${str}
         fi
-     done
-     echo ${lenmax}
-     echo ${str_max}
+    done
     return
  }
 
- function _find_ls_ {
-     pwd
-     local i_ls=`ls | tr -t " " "\n" | wc -l`
-     local j_ls=1
-     for((j_ls=1;j_ls<=i_ls;j_ls++));do
-     str_ls=`ls -A | tr -t " " "\n" | head -n ${j_ls:-0} | tail -n 1`
-     echo ${str_ls}
-     if [[ -d ${str_ls} ]]; then
+function _find_ls_ {
+    echo "所在目录： `pwd`"
+    local i_ls=`ls | tr -t " " "\n" | wc -l`
+    local j_ls=1
+    for((j_ls=1;j_ls<=i_ls;j_ls++));do
+    str_ls=`ls -A | tr -t " " "\n" | head -n ${j_ls:-0} | tail -n 1`
+    echo "读取文件：${str_ls}"
+    if [[ -d ${str_ls} ]]; then
         i_dir=${str_ls}/
         cd ${i_dir}
         _find_ls_
         cd ..
-     else
+    else
        _max_tr_
-     fi
-     done
-     return
+    fi
+    done
+    return
  }
-for i in $@;do
-    cd $i
-    _find_ls_
-    cd /home/liujunming/shell/
+
+for j in $@;do 
+    iftrue=0
+    if [[ ! -f "$j" ]]; then
+        iftrue=${iftrue}+1 
+    fi
+    if [[ ! -d "$j" ]]; then
+        iftrue=${iftrue}+1 
+    fi
+    if [[ ${iftrue} -eq 2 ]]; then
+        exit
+    fi
 done
+    for i in $@;do
+    if [[ -d "$i" ]]; then
+        echo "读取目录：$i"
+        cd $i    
+        _find_ls_
+        cd /home/liujunming/shell/
+    elif [[ -f "$i" ]]; then 
+        echo "读取文件：$i"
+        str_ls=`pwd`/$i 
+        if [[ -f "${str_ls}" ]]; then
+            _max_tr_ 
+        else
+            str_ls=$i
+            _max_tr_ 
+        fi 
+    fi
+    done
+    echo "最长字符串长度：${MAX}"
+    echo "最长字符串为：${MAXString}"
+
 
