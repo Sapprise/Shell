@@ -3,6 +3,7 @@
 MAX=0
 MAXString=0
 
+#查询单个文件内最长字符串
 function _max_tr_ {
     i_tr=`cat ${str_ls} | tr -t " " "\n" | wc -l`
     for((j_tr=1;j_tr<=i_tr;j_tr++));do
@@ -16,6 +17,7 @@ function _max_tr_ {
     return
  }
 
+#当参数是目录时遍历目录
 function _find_ls_ {
     echo "所在目录： `pwd`"
     local i_ls=`ls | tr -t " " "\n" | wc -l`
@@ -35,6 +37,7 @@ function _find_ls_ {
     return
  }
 
+#判断所有参数是否有效
 for j in $@;do 
     iftrue=0
     if [[ ! -f "$j" ]]; then
@@ -47,15 +50,18 @@ for j in $@;do
         exit
     fi
 done
+#对每个参数进行查询
     for i in $@;do
     if [[ -d "$i" ]]; then
         echo "读取目录：$i"
         cd $i    
         _find_ls_
-        cd /home/liujunming/shell/
+#避免目录为相对路径时出现错误
+        cd /home/liujunming/shell/　
     elif [[ -f "$i" ]]; then 
         echo "读取文件：$i"
         str_ls=`pwd`/$i 
+#避免文件为绝对路径时出现错误
         if [[ -f "${str_ls}" ]]; then
             _max_tr_ 
         else
